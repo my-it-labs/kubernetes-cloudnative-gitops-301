@@ -5,13 +5,15 @@ Los alumnos implementan cambios **paso a paso**. El repositorio no debe entregar
 ## Modelo
 
 ```text
-main (fork del alumno)
-  └── api.py, Dockerfile en estado M01
+main (rama Python) — fork del alumno
+  └── api.py + Dockerfile en estado M01
 
 M02-01  →  el alumno edita api.py (config + /ready)
 M02-02  →  el alumno reescribe Dockerfile (multistage)
-M03+    →  manifiestos K8s en infra/k8s/ (cuando existan)
+M03+    →  manifiestos K8s, Helm, CI/CD, GitOps, observabilidad
 ```
+
+Rama `springboot`: mismo temario con **Spring Boot + Angular**.
 
 | Carpeta | Contenido |
 |---------|-----------|
