@@ -6,11 +6,13 @@ Los alumnos implementan cambios **paso a paso**. El repositorio no debe entregar
 
 ```text
 main (fork del alumno)
-  └── api.py, Dockerfile en estado M01
+  └── Spring Boot: application.properties M01
+  └── Angular: environment.ts
+  └── Dockerfile API monolítico Maven
 
-M02-01  →  el alumno edita api.py (config + /ready)
-M02-02  →  el alumno reescribe Dockerfile (multistage)
-M03+    →  manifiestos K8s en infra/k8s/ (cuando existan)
+M02-01  →  externalizar application.properties + Actuator probes
+M02-02  →  Dockerfile multistage (Maven builder + JRE)
+M03+    →  infra/k8s/base/, Helm, Kustomize, CI, ArgoCD, observabilidad
 ```
 
 | Carpeta | Contenido |

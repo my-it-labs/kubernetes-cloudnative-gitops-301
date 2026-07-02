@@ -1,10 +1,8 @@
-# Estado M01/M02-01 — Dockerfile monolítico (baseline antes de M02-02)
-FROM python:3.12-slim
-
+# Estado M01/M02-01 — build monolítico
+FROM maven:3.9-eclipse-temurin-21
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY api.py .
-
+COPY pom.xml .
+COPY src ./src
+RUN mvn -q package -DskipTests -B
 EXPOSE 8081
-CMD ["python", "api.py"]
+CMD ["java", "-jar", "target/demo-api-0.1.0-SNAPSHOT.jar"]

@@ -40,7 +40,7 @@ done
 
 echo "== Stack demo (Compose) =="
 if [[ -f "$COMPOSE" ]]; then
-  for spec in "demo-web:8080" "demo-api:8081/health"; do
+  for spec in "demo-web:8080" "demo-api:8081/actuator/health"; do
     svc="${spec%%:*}"
     target="${spec#*:}"
     host="${target%%/*}"

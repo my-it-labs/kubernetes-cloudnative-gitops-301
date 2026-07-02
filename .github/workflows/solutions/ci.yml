@@ -1,0 +1,48 @@
+name: CI — Spring Boot + Angular
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/app/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository }}/demo-api
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API (Spring Boot)
+        uses: docker/build-push-action@v6
+        with:
+          context: infra/app/api
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.API_IMAGE }}:${{ github.sha }}
+            ${{ env.API_IMAGE }}:latest
+
+      - name: Build and push Web (Angular)
+        uses: docker/build-push-action@v6
+        with:
+          context: infra/app/web
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ghcr.io/${{ github.repository }}/demo-web:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/demo-web:latest

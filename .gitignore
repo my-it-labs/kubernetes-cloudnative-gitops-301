@@ -12,5 +12,7 @@ curso.meta.json
 
 # Entorno local
 infra/.env
-# environment-example
-node_modules
+infra/app/api/target/
+infra/app/web/node_modules/
+infra/app/web/dist/
+infra/app/web/.angular/

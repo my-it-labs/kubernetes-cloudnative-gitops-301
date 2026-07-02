@@ -2,7 +2,7 @@
 
 [Siguiente página →](labs/M01-entorno-codespace-kind/README.md)
 
-Formación **100 % práctica**: adaptas una aplicación al modelo cloudnative, la despliegas en **Kubernetes** (clúster **kind** en Codespaces), automatizas con **CI/CD** y **GitOps**, y la monitorizas con **Prometheus**, **Grafana** y **ELK**.
+Formación **100 % práctica** sobre **Spring Boot** y **Angular**: adaptas una aplicación al modelo cloudnative, la despliegas en **Kubernetes** (clúster **kind** en Codespaces), automatizas con **CI/CD** y **GitOps**, y la monitorizas con **Prometheus**, **Grafana** y **ELK**.
 
 ## Cómo funciona el curso
 

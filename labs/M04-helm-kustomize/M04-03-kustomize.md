@@ -4,6 +4,64 @@
 
 ## Objetivo
 
-Estructurar manifests con bases y overlays (dev/staging/prod).
+Organizar manifests con **Kustomize**: base + overlays `dev` y `staging` sin duplicar YAML.
 
-*(LAB 8 — guion en elaboración.)*
+## Prerrequisitos
+
+- M04-02 completado.
+
+Referencia: `infra/kustomize/solutions/`.
+
+---
+
+### 1 — Base
+
+```bash
+mkdir -p infra/kustomize/base infra/kustomize/overlays/{dev,staging}
+```
+
+`base/kustomization.yaml` referencia tus recursos K8s (o los de `infra/k8s/base/`).
+
+---
+
+### 2 — Overlay dev
+
+`overlays/dev/kustomization.yaml`:
+
+```yaml
+resources:
+  - ../../base
+nameSuffix: -dev
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+      name: demo-api
+```
+
+---
+
+### 3 — Previsualizar y aplicar
+
+```bash
+kubectl kustomize infra/kustomize/overlays/dev
+kubectl apply -k infra/kustomize/overlays/dev
+```
+
+---
+
+### 4 — Comparar overlays
+
+```bash
+diff <(kubectl kustomize infra/kustomize/overlays/dev) \
+     <(kubectl kustomize infra/kustomize/overlays/staging)
+```
+
+**Por qué:** Kustomize complementa Helm — patches declarativos por carpeta; ArgoCD soporta ambos.
+
+---
+
+→ **[M05 — CI/CD](../M05-cicd/README.md)**

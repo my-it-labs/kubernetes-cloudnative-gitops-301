@@ -1,0 +1,23 @@
+<main>
+  <h1>{{ title() }}</h1>
+  <p>Frontend Angular — demo del curso CloudNative + GitOps</p>
+
+  <section class="card">
+    <h2>API Spring Boot</h2>
+    <p>Health (Actuator): <span [class]="health() === 'UP' || health() === 'ok' ? 'ok' : ''">{{ health() }}</span></p>
+    <p>Readiness: <span>{{ readiness() }}</span></p>
+    <button type="button" (click)="refreshHealth()">Refrescar health</button>
+    <button type="button" (click)="checkReadiness()">Probar readiness</button>
+  </section>
+
+  <section class="card">
+    <h2>/work</h2>
+    <button type="button" [disabled]="loading()" (click)="doWork()">Llamar /work</button>
+    @if (hits() !== null) {
+      <p>Hits en Redis: <strong>{{ hits() }}</strong></p>
+    }
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+  </section>
+</main>

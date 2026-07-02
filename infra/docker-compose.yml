@@ -2,6 +2,7 @@ services:
   demo-web:
     build:
       context: app/web
+    image: cloudnative-demo-web:local
     ports:
       - "8080:8080"
     depends_on:
@@ -12,6 +13,7 @@ services:
     build:
       context: app/api
       dockerfile: Dockerfile
+    image: cloudnative-demo-api:local
     ports:
       - "8081:8081"
     env_file:

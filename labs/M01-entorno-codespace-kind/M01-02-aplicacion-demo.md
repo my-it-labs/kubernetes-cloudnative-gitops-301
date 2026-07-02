@@ -6,7 +6,7 @@
 
 ### Objetivo
 
-Levantar la aplicación demo con los scripts de Compose, entender **qué automatiza cada uno**, y explorar el código que adaptarás en M02.
+Levantar la stack **Spring Boot + Angular** con los scripts de Compose, entender **qué automatiza cada uno**, y explorar el código que adaptarás en M02.
 
 ### Prerrequisitos
 
@@ -31,7 +31,7 @@ Usas `lab-up.sh` para desplegar la stack, validas endpoints, revisas el código 
 | Orden | Acción | Motivo |
 |-------|--------|--------|
 | 1 | Si no existe `infra/.env`, copia `infra/.env.example` | Variables de entorno listas sin editar a mano la primera vez |
-| 2 | `docker compose -f infra/docker-compose.yml up -d --build` | Construye imágenes demo-api/demo-web y levanta Postgres, Redis, loadgen |
+| 2 | `docker compose ... up -d --build` | Construye imágenes Spring Boot + Angular y levanta Postgres, Redis, loadgen |
 | 3 | Ejecuta `health-check.sh` | Confirma en el mismo comando que 8080/8081 responden |
 
 **Por qué un script en lugar de `docker compose up` directo:**
@@ -49,11 +49,11 @@ Usas `lab-up.sh` para desplegar la stack, validas endpoints, revisas el código 
 **Acción:**
 
 ```bash
-curl -s http://127.0.0.1:8081/health | jq .
+curl -s http://127.0.0.1:8081/actuator/health | jq .
 curl -s http://127.0.0.1:8081/work | jq .
 ```
 
-**Nota:** `/ready` no existe aún en M01 — lo añadirás en M02-01.
+**Nota:** Readiness Actuator no está habilitado en M01 — lo configurarás en M02-01.
 
 **Por qué:** Los scripts comprueban HTTP; tú validas el **contenido JSON** que usarás en labs de observabilidad (M08).
 
@@ -71,11 +71,11 @@ curl -s http://127.0.0.1:8081/work | jq .
 
 ### 4 — Explorar el código y la config
 
-**Acción:** Abre `infra/app/api/api.py` y `infra/.env.example`.
+**Acción:** Abre `infra/app/api/src/main/resources/application.properties` y `infra/.env.example`.
 
-**Por qué:** El código está **intencionadamente** en estado M01: URLs y puertos embebidos en constantes. En M02-01 tú externalizarás esa config (metodología [12-Factor](../../docs/12-factor-app.md)).
+**Por qué:** El código está **intencionadamente** en estado M01: JDBC y Redis embebidos en properties. En M02-01 externalizarás con `${...}` y Actuator.
 
-**Resultado esperado:** Ves `DATABASE_URL = "postgres://..."` en el código y **no** existe endpoint `/ready` (404 si lo pruebas con curl).
+**Resultado esperado:** Ves `spring.datasource.url=jdbc:postgresql://...` en properties. El frontend Angular en :8080 muestra health y permite llamar `/work`.
 
 ---
 

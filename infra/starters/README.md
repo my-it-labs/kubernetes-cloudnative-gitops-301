@@ -4,7 +4,7 @@ Copias de referencia del **estado inicial** de cada fase. Los scripts `lab-prepa
 
 | Fichero | Estado | Usado en |
 |---------|--------|----------|
-| `api.m01.py` | Config embebida, sin `/ready` | M02-01 |
-| `Dockerfile.m01` | Monolítico, root | M02-02 |
+| `application.m01.properties` | JDBC/redis embebidos, sin probes | M02-01 |
+| `Dockerfile.m01` | Maven monolítico | M02-02 |
 
-No edites estos ficheros durante los labs: trabaja sobre `api.py` y `Dockerfile` en `infra/app/api/`.
+No edites estos ficheros durante los labs: trabaja sobre `infra/app/api/src/main/resources/application.properties` y `infra/app/api/Dockerfile`.

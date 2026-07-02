@@ -1,0 +1,23 @@
+name: CD — Helm a kind (lab)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/helm/cloudnative-demo/**'
+      - '.github/workflows/cd.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Deploy chart (ejemplo — en Codespace usar helm-install.sh)
+        run: |
+          helm lint infra/helm/cloudnative-demo
+          echo "En el lab despliegas con ./scripts/helm-install.sh contra kind"

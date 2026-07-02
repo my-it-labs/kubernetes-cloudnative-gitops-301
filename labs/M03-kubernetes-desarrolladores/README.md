@@ -12,7 +12,14 @@
 
 Kubernetes declara el **estado deseado**. Deployments gestionan réplicas; Services exponen tráfico; PersistentVolumeClaims guardan datos más allá del ciclo de vida del Pod.
 
-En los laboratorios desplegarás la app demo en kind, aplicarás rolling updates y añadirás PostgreSQL con volumen persistente.
+En los laboratorios desplegarás la **API Spring Boot** y el **frontend Angular** en kind, aplicarás rolling updates y añadirás PostgreSQL con volumen persistente.
+
+## Scripts útiles
+
+| Script | Módulo |
+|--------|--------|
+| `./scripts/k8s-apply.sh` | Cargar imágenes en kind y aplicar `infra/k8s/base/` |
+| `./scripts/lab-prepare.sh m03-01` | Estado post-M02 + carpeta K8s vacía |
 
 ## Ahora practica tú
 

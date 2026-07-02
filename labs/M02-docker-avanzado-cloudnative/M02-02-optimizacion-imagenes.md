@@ -1,6 +1,8 @@
-# M02-02 — Optimización de imágenes Docker
+# M02-02 — Optimización de imágenes Docker (Spring Boot)
 
 [← Página anterior](M02-01-adaptacion-cloudnative.md) · [Siguiente página →](../M03-kubernetes-desarrolladores/README.md)
+
+> Práctica del módulo. Build **multistage Maven + JRE** para el JAR de Spring Boot.
 
 > Práctica del módulo. Lee primero el [README del módulo](README.md) (sección *Imágenes Docker: monolito vs multistage*).
 
@@ -51,19 +53,18 @@ Paso 6      Caché: requirements.txt antes que api.py
 
 ### 1 — Baseline: Dockerfile monolítico
 
-**Acción:** Abre `infra/app/api/Dockerfile.legacy`:
+**Acción:** Abre `infra/app/api/Dockerfile.legacy` — un solo stage con Maven + JAR:
 
 ```dockerfile
-FROM python:3.12-slim
+FROM maven:3.9-eclipse-temurin-21
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY api.py .
-EXPOSE 8081
-CMD ["python", "api.py"]
+COPY pom.xml .
+COPY src ./src
+RUN mvn -q package -DskipTests -B
+CMD ["java", "-jar", "target/demo-api-0.1.0-SNAPSHOT.jar"]
 ```
 
-**Por qué:** Necesitas una **línea base** antes de optimizar. Este Dockerfile es legible y válido para labs; en producción suele ser el primer candidato a refactor.
+**Por qué:** Incluye JDK, Maven y artefactos de build en la imagen final — proceso como **root**.
 
 **En profundidad:** Todo ocurre en **una sola imagen final**:
 
@@ -84,24 +85,23 @@ CMD ["python", "api.py"]
 | 1 | `builder` | `pip install --prefix=/install` |
 | 2 | `runtime` | Copia `/install`, copia `api.py`, `USER app` |
 
-Patrón objetivo:
+Patrón objetivo (Maven builder + JRE Alpine):
 
 ```dockerfile
-FROM python:3.12-slim AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /build
-COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+COPY pom.xml .
+RUN mvn -q dependency:go-offline -B
+COPY src ./src
+RUN mvn -q package -DskipTests -B
 
-FROM python:3.12-slim AS runtime
-RUN groupadd --gid 10001 app \
-    && useradd --uid 10001 --gid app --create-home --shell /usr/sbin/nologin app
+FROM eclipse-temurin:21-jre-alpine AS runtime
+RUN addgroup -g 10001 app && adduser -u 10001 -G app -D app
 WORKDIR /app
-COPY --from=builder /install /usr/local
-COPY api.py .
+COPY --from=builder /build/target/demo-api-*.jar app.jar
 USER app
 EXPOSE 8081
-ENV PORT=8081
-CMD ["python", "api.py"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 **Por qué:** Solo el stage **`runtime`** se publica como imagen final. El `builder` existe durante el build y se descarta.

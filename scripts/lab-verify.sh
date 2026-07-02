@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Comprueba que el alumno completó un laboratorio (sin revelar la solución línea a línea).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LAB="${1:-}"
-API="$ROOT/infra/app/api/api.py"
+PROPS="$ROOT/infra/app/api/src/main/resources/application.properties"
 DOCKERFILE="$ROOT/infra/app/api/Dockerfile"
 
 usage() {
@@ -12,8 +11,10 @@ usage() {
 Uso: ./scripts/lab-verify.sh <lab>
 
 Labs disponibles:
-  m02-01   config externalizada + endpoint /ready
-  m02-02   Dockerfile multistage + usuario no-root
+  m02-01   application.properties externalizado + probes Actuator
+  m02-02   Dockerfile multistage Spring Boot + usuario no-root
+  m03-01   manifests base mínimos en infra/k8s/base/
+  m04-01   chart Helm cloudnative-demo instalable
 EOF
 }
 
@@ -25,12 +26,14 @@ errors=0
 case "$LAB" in
   m02-01)
     echo "== Verificando M02-01 =="
-    grep -q 'os\.environ' "$API" || fail "api.py no usa os.environ"
-    grep -q 'def ready' "$API" || fail "falta endpoint /ready"
-    grep -q 'postgres://lab:lab@postgres' "$API" && fail "DATABASE_URL sigue hardcodeada en api.py"
-    grep -q '@app.get("/ready")' "$API" || fail "falta decorador @app.get(\"/ready\")"
+    grep -q 'spring.datasource.url=\${SPRING_DATASOURCE_URL}' "$PROPS" \
+      || fail "falta spring.datasource.url externalizada sin default"
+    grep -q 'management.endpoint.health.probes.enabled=true' "$PROPS" \
+      || fail "faltan probes de Actuator (readiness/liveness)"
+    grep -q 'jdbc:postgresql://postgres' "$PROPS" \
+      && fail "DATABASE_URL/JDBC sigue hardcodeada en application.properties"
     if [[ "$errors" -eq 0 ]]; then
-      ok "api.py cumple los requisitos de M02-01"
+      ok "application.properties cumple M02-01"
     fi
     ;;
   m02-02)
@@ -38,10 +41,30 @@ case "$LAB" in
     grep -q 'AS builder' "$DOCKERFILE" || fail "Dockerfile sin stage builder"
     grep -q 'AS runtime' "$DOCKERFILE" || fail "Dockerfile sin stage runtime"
     grep -q 'COPY --from=builder' "$DOCKERFILE" || fail "falta COPY --from=builder"
-    grep -q 'USER app' "$DOCKERFILE" || fail "falta USER app (no-root)"
-    grep -q 'FROM python:3.12-slim AS builder' "$DOCKERFILE" || fail "revisa estructura multistage"
+    grep -q 'USER app' "$DOCKERFILE" || fail "falta USER app"
     if [[ "$errors" -eq 0 ]]; then
-      ok "Dockerfile cumple los requisitos de M02-02"
+      ok "Dockerfile cumple M02-02"
+    fi
+    ;;
+  m03-01)
+    echo "== Verificando M03-01 =="
+    for f in namespace.yaml api-deployment.yaml api-service.yaml web-deployment.yaml web-service.yaml; do
+      [[ -f "$ROOT/infra/k8s/base/$f" ]] || fail "falta infra/k8s/base/$f"
+    done
+    grep -q 'kind: Deployment' "$ROOT/infra/k8s/base/api-deployment.yaml" 2>/dev/null \
+      || fail "api-deployment.yaml incompleto"
+  if [[ "$errors" -eq 0 ]]; then
+      ok "manifests base M03-01 presentes"
+    fi
+    ;;
+  m04-01)
+    echo "== Verificando M04-01 =="
+    [[ -f "$ROOT/infra/helm/cloudnative-demo/Chart.yaml" ]] \
+      || fail "falta infra/helm/cloudnative-demo/Chart.yaml"
+    [[ -f "$ROOT/infra/helm/cloudnative-demo/values.yaml" ]] \
+      || fail "falta values.yaml"
+    if [[ "$errors" -eq 0 ]]; then
+      ok "chart Helm cloudnative-demo presente"
     fi
     ;;
   -h|--help|"")
