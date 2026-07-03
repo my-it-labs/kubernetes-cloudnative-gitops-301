@@ -34,6 +34,52 @@ Cadena causa → efecto:
 
 **Resumen en una frase:** *Running* significa que el contenedor arrancó; *Ready* significa que la sonda `/ready` respondió OK. Sin Ready, no hay rollout completado.
 
+## Cómo ver que la sonda readiness falla
+
+**No tienes que adivinar.** Puedes comprobarlo en tres sitios (de más rápido a más detallado):
+
+| Paso | Comando | Qué te dice |
+|------|---------|-------------|
+| 1 | `kubectl -n cloudnative-lab get pods -l app=demo-api` | Columna **READY `0/1`** → la sonda no está dando OK (aunque STATUS sea `Running`). |
+| 2 | `curl` a `/ready` (con port-forward) | Código **503** o JSON `"not_ready"` → la app confirma que no está lista. |
+| 3 | **Eventos** del Pod (`describe pod`) | Kubernetes registra el fallo de la sonda en texto claro. |
+
+**Los eventos son la prueba más explícita.** El kubelet escribe una línea cada vez que la readinessProbe falla:
+
+```bash
+kubectl -n cloudnative-lab describe pod -l app=demo-api
+```
+
+Baja hasta la sección **Events** al final. Busca líneas como:
+
+```text
+Warning  Unhealthy  ...  Readiness probe failed: HTTP probe failed with statuscode: 503
+```
+
+Eso significa literalmente: *«Hice GET /ready y no recibí 200»*. No es un error misterioso del rollout — es la sonda.
+
+También puedes ver eventos del Deployment:
+
+```bash
+kubectl -n cloudnative-lab describe deployment demo-api
+```
+
+Ahí verás mensajes del tipo *«ReplicaSet ... has timed out progressing»* cuando los Pods nuevos no pasan a Ready a tiempo.
+
+**Orden recomendado para alumnos:**
+
+```bash
+# 1) ¿Los Pods están Ready?
+kubectl -n cloudnative-lab get pods -l app=demo-api
+
+# 2) ¿Qué responde la app en /ready?
+kubectl -n cloudnative-lab port-forward svc/demo-api 8081:8081 &
+curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8081/ready
+
+# 3) ¿Qué dice Kubernetes en los eventos? (confirmación)
+kubectl -n cloudnative-lab describe pod -l app=demo-api | tail -20
+```
+
 > [!IMPORTANT]
 > En M03-01 el Secret apunta a `postgres:5432`, pero el servicio Postgres **no existe hasta que lo despliegues**. Entonces `/ready` devuelve **503**, la sonda falla, y el rollout se atasca. **No es por el `rollout restart` ni por cambiar el ConfigMap** — es la sonda que no ve OK.
 
@@ -219,19 +265,26 @@ Waiting for deployment "demo-api" rollout to finish: 1 out of 2 new replicas hav
 **Diagnóstico (copia y pega):**
 
 ```bash
-kubectl -n cloudnative-lab describe pod -l app=demo-api | grep -A2 "Readiness"
-kubectl -n cloudnative-lab get svc postgres redis
+# Pista rápida
+kubectl -n cloudnative-lab get pods -l app=demo-api
+
+# Lo que responde la app
 kubectl -n cloudnative-lab port-forward svc/demo-api 8081:8081 &
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8081/ready
 curl -s http://127.0.0.1:8081/ready | jq .
+
+# Eventos del Pod (aquí ves el fallo de la sonda escrito por Kubernetes)
+kubectl -n cloudnative-lab describe pod -l app=demo-api | grep -E "Readiness|Unhealthy|Events" -A3
+kubectl -n cloudnative-lab get svc postgres redis
 ```
 
 | Lo que ves | Significado |
 |------------|-------------|
-| `Readiness probe failed ... statuscode: 503` | `/ready` falla — revisa Postgres/Redis |
+| READY `0/1` en `get pods` | La sonda readiness **no** está dando OK |
+| `Readiness probe failed ... statuscode: 503` en **Events** | Confirmación: kubelet llamó a `/ready` y recibió 503 |
 | `get svc postgres` → NotFound | Falta desplegar Postgres (paso «Antes de empezar») |
 | JSON con `"not_ready"` y error de conexión a `postgres` | Mismo caso: aplica `postgres.yaml` |
-| HTTP 200 y `"status": "ready"` pero rollout atascado | Menos habitual; revisa `kubectl describe deploy demo-api` (eventos) |
+| HTTP 200 y `"status": "ready"` pero rollout atascado | Menos habitual; revisa eventos del Deployment (`describe deployment demo-api`) |
 
 **Arreglo:**
 
