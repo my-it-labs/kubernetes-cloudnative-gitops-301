@@ -28,6 +28,20 @@ infra/helm/
     └── values-staging.yaml
 ```
 
+> [!IMPORTANT]
+> **Cada cambio exige `helm upgrade`**
+>
+> Helm **no** aplica solo al guardar ficheros. Tras editar cualquiera de estos, vuelve a ejecutar `helm upgrade --install` con los mismos `-n` y `-f` que uses en el lab:
+>
+> | Cambias | Ejemplo |
+> |---------|---------|
+> | Template (`templates/*.yaml`) | probes, `resources`, nuevo campo |
+> | `values.yaml` del chart | imagen, réplicas por defecto |
+> | Override (`infra/helm/environments/*.yaml`) | `serviceName`, CPU/memoria |
+> | CLI | `--set api.replicas=2` |
+>
+> Sin upgrade, el clúster sigue con la **revisión anterior** del release. `helm template` sirve para previsualizar; **solo `helm upgrade` publica** en Kubernetes.
+
 ---
 
 ### 1 — values por entorno (solo las diferencias)
@@ -46,6 +60,8 @@ config:
 Crea **`infra/helm/environments/values-staging.yaml`** con `replicas: 2` y otro `serviceName`.
 
 Referencia: `infra/helm/solutions/environments/`.
+
+**Tras crear o editar estos ficheros**, aplica con `helm upgrade` (paso 2). Guardar el YAML en disco no actualiza el clúster.
 
 ---
 
@@ -85,6 +101,9 @@ helm upgrade --install cloudnative-demo infra/helm/cloudnative-demo \
 ```
 
 `--set` tiene prioridad sobre los `-f`.
+
+> [!NOTE]
+> Repite este mismo comando **`helm upgrade --install`** cada vez que modifiques templates, `values.yaml` o `infra/helm/environments/*.yaml`. Es el equivalente a volver a aplicar el despliegue.
 
 Verifica el ConfigMap generado:
 
@@ -140,6 +159,8 @@ helm template cloudnative-demo infra/helm/cloudnative-demo \
   -f infra/helm/environments/values-dev.yaml | grep -A8 "resources:"
 ```
 
+`helm template` **no despliega** — solo muestra el YAML renderizado. Después del cambio en template o values, **obligatorio** `helm upgrade`:
+
 Aplica:
 
 ```bash
@@ -152,6 +173,13 @@ kubectl -n cloudnative-lab get deploy demo-api -o jsonpath='{.spec.template.spec
 ---
 
 → **[M04-03 — Kustomize](M04-03-kustomize.md)**
+
+## Errores frecuentes
+
+| Síntoma | Causa | Arreglo |
+|---------|-------|---------|
+| Edité values/template pero no veo cambios en el clúster | No ejecutaste `helm upgrade` tras el cambio | `helm upgrade --install` con mismos `-n` y `-f` |
+| `helm template` muestra bien pero `kubectl` no | `template` no aplica; solo previsualiza | Lanza `helm upgrade` |
 
 ```bash
 ./scripts/lab-verify.sh m04-02

@@ -102,6 +102,9 @@ kubectl -n cloudnative-lab get pods
 
 `--create-namespace` crea el namespace **solo si no existe** (en M03 ya existe; no hace daño). Lo importante es **`-n cloudnative-lab`**: eso rellena `.Release.Namespace` en todos los templates.
 
+> [!NOTE]
+> Cada vez que edites **templates** o **values.yaml**, repite `helm upgrade --install` (o `./scripts/helm-install.sh`). Helm no sincroniza el clúster al guardar ficheros.
+
 O con el script del curso:
 
 ```bash
