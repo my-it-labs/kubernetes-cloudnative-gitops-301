@@ -10,7 +10,7 @@
 | Módulo | Ruta |
 |--------|------|
 | M03 K8s | `infra/k8s/solutions/` |
-| M04 Helm | `infra/helm/solutions/cloudnative-demo/` + `values-dev.yaml`, `values-staging.yaml` |
+| M04 Helm | `infra/helm/solutions/cloudnative-demo/` + `infra/helm/solutions/environments/` |
 | M04 Kustomize | `infra/kustomize/solutions/` |
 | M05 CI/CD | `.github/workflows/solutions/` |
 | M06 ArgoCD | `infra/argocd/solutions/` |

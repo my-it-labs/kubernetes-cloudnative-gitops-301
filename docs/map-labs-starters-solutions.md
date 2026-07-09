@@ -18,7 +18,7 @@
 | M03-02 | Solución M03-01 en `infra/k8s/base/` | (mismo) |
 | M03-03 | M03-01 + `postgres.yaml` starter | `m03-03/postgres-statefulset.yaml` |
 | M04-01 | `infra/helm/starters/` | `infra/helm/solutions/` |
-| M04-02 | Chart sin `values-dev`/`staging` | `values-*.yaml` en solutions |
+| M04-02 | Overrides en `infra/helm/environments/` | `infra/helm/solutions/environments/` |
 | M04-03 | `infra/kustomize/starters/` | `infra/kustomize/solutions/` |
 | M05-01 | Sin workflows activos | `.github/workflows/solutions/` |
 | M06-01 | `infra/argocd/starters/` | `infra/argocd/solutions/` |

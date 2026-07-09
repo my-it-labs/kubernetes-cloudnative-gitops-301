@@ -20,6 +20,7 @@ infra/app/web/.angular/
 # Trabajo del alumno (generado por lab-prepare)
 infra/k8s/base/
 infra/helm/cloudnative-demo/
+infra/helm/environments/values-*.yaml
 infra/kustomize/base/
 infra/kustomize/overlays/
 infra/argocd/application-*.yaml

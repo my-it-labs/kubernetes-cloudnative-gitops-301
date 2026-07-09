@@ -4,23 +4,37 @@
 
 ## Objetivo
 
-Parametrizar réplicas, nombres de servicio y recursos con `values.yaml` y overrides por línea de comandos.
+Parametrizar réplicas, nombres de servicio y recursos con `values.yaml` (dentro del chart) y **overrides por entorno fuera del chart**.
 
 ## Antes de empezar
 
 ```bash
 ./scripts/lab-prepare.sh m04-02
+mkdir -p infra/helm/environments
 ```
 
-El chart solución ya está en `infra/helm/cloudnative-demo/` (sin `values-dev` / `values-staging` — los creas en el paso 1).
+El chart queda en `infra/helm/cloudnative-demo/`. Los values de entorno van en **`infra/helm/environments/`** (carpeta hermana, no dentro del chart).
+
+## Estructura
+
+```text
+infra/helm/
+├── cloudnative-demo/          # Chart (values.yaml por defecto)
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   └── templates/
+└── environments/              # Overrides por entorno (M04-02)
+    ├── values-dev.yaml
+    └── values-staging.yaml
+```
+
+---
 
 ### 1 — values por entorno (solo las diferencias)
 
-El chart ya trae **`values.yaml`** con los valores por defecto (imágenes, puertos, redis, etc.). Helm **lo carga automáticamente** en cada `install` / `upgrade`; no hace falta pasarlo con `-f`.
+El chart ya trae **`values.yaml`** con los valores por defecto. Helm **lo carga automáticamente**; no hace falta `-f values.yaml`.
 
-Los ficheros por entorno (`values-dev.yaml`, `values-staging.yaml`) deben contener **solo lo que cambia** respecto a la base:
-
-Crea `infra/helm/cloudnative-demo/values-dev.yaml`:
+Crea **`infra/helm/environments/values-dev.yaml`** (fuera del chart):
 
 ```yaml
 api:
@@ -29,40 +43,44 @@ config:
   serviceName: cloudnative-demo-api-dev
 ```
 
-Crea `values-staging.yaml` con `replicas: 2` y otro `serviceName`.
+Crea **`infra/helm/environments/values-staging.yaml`** con `replicas: 2` y otro `serviceName`.
 
-Referencia: `infra/helm/solutions/values-dev.yaml` y `values-staging.yaml`.
+Referencia: `infra/helm/solutions/environments/`.
 
 ---
 
 ### 2 — Upgrade con overrides (capas de values)
 
-**Concepto:** Helm fusiona valores en este orden (los últimos ganan si hay clave repetida):
+**Concepto:** Helm fusiona valores en este orden (los últimos ganan):
 
 ```text
-1. values.yaml del chart          ← siempre (por defecto, sin -f)
-2. -f values-dev.yaml           ← override de entorno
-3. --set api.replicas=3         ← override puntual en CLI (opcional)
+1. values.yaml del chart              ← automático (dentro del chart)
+2. -f infra/helm/environments/...     ← override de entorno (fuera)
+3. --set api.replicas=3               ← override puntual en CLI
 ```
-
-**No repitas** `-f values.yaml`: confunde «base» con «override». La base ya está en el chart.
 
 **Acción — desplegar con values de desarrollo:**
 
 ```bash
 helm upgrade --install cloudnative-demo infra/helm/cloudnative-demo \
   -n cloudnative-lab \
-  -f infra/helm/cloudnative-demo/values-dev.yaml
+  -f infra/helm/environments/values-dev.yaml
 ```
 
-Para staging, cambia el último `-f` por `values-staging.yaml`.
-
-**Override puntual en línea de comandos** (sin editar ficheros):
+Para staging:
 
 ```bash
-helm upgrade cloudnative-demo infra/helm/cloudnative-demo \
+helm upgrade --install cloudnative-demo infra/helm/cloudnative-demo \
   -n cloudnative-lab \
-  -f infra/helm/cloudnative-demo/values-dev.yaml \
+  -f infra/helm/environments/values-staging.yaml
+```
+
+**Override puntual en línea de comandos:**
+
+```bash
+helm upgrade --install cloudnative-demo infra/helm/cloudnative-demo \
+  -n cloudnative-lab \
+  -f infra/helm/environments/values-dev.yaml \
   --set api.replicas=2
 ```
 
@@ -74,7 +92,7 @@ Verifica el ConfigMap generado:
 kubectl -n cloudnative-lab get configmap demo-api-config -o yaml | grep SERVICE_NAME
 ```
 
-**Resultado esperado:** `SERVICE_NAME` refleja el entorno (`...-dev` o `...-staging`), no el valor por defecto del `values.yaml` base.
+**Resultado esperado:** `SERVICE_NAME` refleja el entorno (`...-dev` o `...-staging`).
 
 ---
 
@@ -91,7 +109,7 @@ helm rollback cloudnative-demo 1 -n cloudnative-lab
 
 ### 4 — Recursos y límites
 
-Añade en values:
+Añade en `infra/helm/environments/values-dev.yaml` (o en el `values.yaml` base si aplica a todos):
 
 ```yaml
 api:

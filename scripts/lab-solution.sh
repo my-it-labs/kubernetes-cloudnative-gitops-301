@@ -33,8 +33,9 @@ case "$LAB" in
     ;;
   m04-01|m04-02)
     copy_tree "$ROOT/infra/helm/solutions/cloudnative-demo" "$ROOT/infra/helm/cloudnative-demo"
-    cp "$ROOT/infra/helm/solutions/values-dev.yaml" "$ROOT/infra/helm/cloudnative-demo/" 2>/dev/null || true
-    cp "$ROOT/infra/helm/solutions/values-staging.yaml" "$ROOT/infra/helm/cloudnative-demo/" 2>/dev/null || true
+    mkdir -p "$ROOT/infra/helm/environments"
+    cp "$ROOT/infra/helm/solutions/environments/values-dev.yaml" "$ROOT/infra/helm/environments/" 2>/dev/null || true
+    cp "$ROOT/infra/helm/solutions/environments/values-staging.yaml" "$ROOT/infra/helm/environments/" 2>/dev/null || true
     ;;
   m04-03)
     rm -rf "$ROOT/infra/kustomize/base" "$ROOT/infra/kustomize/overlays"

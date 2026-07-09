@@ -9,6 +9,7 @@ API_PY="$ROOT/infra/app/api/api.py"
 API_DOCKERFILE="$ROOT/infra/app/api/Dockerfile"
 K8S_BASE="$ROOT/infra/k8s/base"
 HELM_CHART="$ROOT/infra/helm/cloudnative-demo"
+HELM_ENV="$ROOT/infra/helm/environments"
 KUSTOMIZE="$ROOT/infra/kustomize"
 ARGOCD="$ROOT/infra/argocd"
 WORKFLOWS="$ROOT/.github/workflows"
@@ -29,7 +30,7 @@ Kubernetes (M03):
 
 Helm / Kustomize (M04):
   m04-01   chart starter Helm
-  m04-02   chart solución sin values-dev/staging
+  m04-02   chart solución; alumno crea overrides en infra/helm/environments/
   m04-03   starters Kustomize
 
 CI/CD (M05):
@@ -103,7 +104,8 @@ case "$LAB" in
     echo "== M04-02 =="
     prepare_app_post_m02
     copy_tree "$ROOT/infra/helm/solutions/cloudnative-demo" "$HELM_CHART"
-    rm -f "$HELM_CHART/values-dev.yaml" "$HELM_CHART/values-staging.yaml" 2>/dev/null || true
+    rm -rf "$HELM_ENV"
+    mkdir -p "$HELM_ENV"
     ;;
   m04-03)
     echo "== M04-03 =="

@@ -58,7 +58,7 @@ case "$LAB" in
     ;;
   m04-02)
     echo "== M04-02 =="
-    [[ -f "$ROOT/infra/helm/cloudnative-demo/values-dev.yaml" ]] || fail "falta values-dev.yaml"
+    [[ -f "$ROOT/infra/helm/environments/values-dev.yaml" ]] || fail "falta infra/helm/environments/values-dev.yaml"
     ;;
   m04-03)
     echo "== M04-03 =="

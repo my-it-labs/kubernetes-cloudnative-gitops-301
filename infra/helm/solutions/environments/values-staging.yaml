@@ -1,4 +1,4 @@
-# M04-02 — entorno staging
+# M04-02 — override staging (fuera del chart)
 api:
   replicas: 2
 config:
