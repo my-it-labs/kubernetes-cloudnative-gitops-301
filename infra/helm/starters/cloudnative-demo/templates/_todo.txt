@@ -1,2 +1,3 @@
-# TODO M04-01: templates api, web, redis, postgres (ver infra/helm/solutions/)
-# NO crear templates/namespace.yaml — cloudnative-lab ya existe desde M03
+# TODO M04-01: templates api, web, redis (ver infra/helm/solutions/)
+# - metadata.namespace: {{ .Release.Namespace }}  (NO namespace en values.yaml)
+# - api.servicePort: 8081, web.servicePort: 8080 en values.yaml

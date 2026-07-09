@@ -15,7 +15,9 @@ Crear un **chart Helm** para empaquetar la demo **Flask + nginx** y sustituir lo
 >
 > El namespace `cloudnative-lab` **ya lo creaste en M03** con `kubectl`. Si el chart intenta crear el mismo Namespace, Helm falla con *invalid ownership metadata* / *cannot be imported into the current release*.
 >
-> El chart solo despliega recursos **dentro** del namespace existente (`helm install -n cloudnative-lab`). Usa `{{ .Values.namespace }}` en Deployments/Services, no un objeto `Kind: Namespace`.
+> El chart solo despliega recursos **dentro** del namespace del release (`helm install -n cloudnative-lab`).
+>
+> En los templates usa **`{{ .Release.Namespace }}`**, no `namespace:` en `values.yaml` ni `{{ .Values.namespace }}`. Así el `-n` del comando y los objetos en el clúster **siempre coinciden** (mismas anotaciones `meta.helm.sh/release-namespace`).
 
 ## Antes de empezar
 
@@ -50,7 +52,7 @@ Elimina templates de ejemplo (nginx, etc.) y **elimina también `templates/names
 
 ### 2 — Plantillas mínimas
 
-Traslada tus manifests M03 a templates Helm con `{{ .Values.api.image }}`, `{{ .Values.namespace }}`, etc.
+Traslada tus manifests M03 a templates Helm con `{{ .Values.api.image }}`, **`{{ .Release.Namespace }}`**, etc.
 
 Archivos mínimos:
 
@@ -60,21 +62,31 @@ Archivos mínimos:
 
 **No incluyas** `templates/namespace.yaml`.
 
+Ejemplo en cada recurso:
+
+```yaml
+metadata:
+  name: demo-api
+  namespace: {{ .Release.Namespace }}
+```
+
 ---
 
 ### 3 — values.yaml
 
 ```yaml
-namespace: cloudnative-lab
 api:
   image: cloudnative-demo-api:local
   replicas: 2
+  servicePort: 8081
 web:
   image: cloudnative-demo-web:local
+  replicas: 1
+  servicePort: 8080
   nodePort: 30080
 ```
 
-`namespace` en values es para `metadata.namespace` de tus recursos, no para crear el Namespace.
+**No pongas `namespace:` en values.** El namespace lo define `helm install -n cloudnative-lab`. Si mezclas `namespace: cloudnative-lab` en values con `-n cloudnative-lab2`, los objetos van a un sitio y el release a otro → choques de ownership al hacer otro install.
 
 ---
 
@@ -83,10 +95,12 @@ web:
 ```bash
 helm lint infra/helm/cloudnative-demo
 helm upgrade --install cloudnative-demo infra/helm/cloudnative-demo \
-  -n cloudnative-lab
+  -n cloudnative-lab --create-namespace
 kubectl -n cloudnative-lab get pods
 ./scripts/lab-verify.sh m04-01
 ```
+
+`--create-namespace` crea el namespace **solo si no existe** (en M03 ya existe; no hace daño). Lo importante es **`-n cloudnative-lab`**: eso rellena `.Release.Namespace` en todos los templates.
 
 O con el script del curso:
 
@@ -100,9 +114,11 @@ O con el script del curso:
 
 | Error | Causa | Arreglo |
 |-------|-------|---------|
-| `Namespace "cloudnative-lab" exists and cannot be imported into the current release` | Chart con `templates/namespace.yaml` y el ns ya existe (M03) | Borra ese template; instala solo con `-n cloudnative-lab` |
-| `missing key "app.kubernetes.io/managed-by": Helm` | Helm quiere «adoptar» un ns creado por kubectl | Igual: no gestiones el Namespace desde el chart |
-| `helm list` vacío pero falla install | Mismo conflicto en primer install | Quita Namespace del chart; no hace falta borrar el ns |
+| `Namespace "cloudnative-lab" exists and cannot be imported` | Chart con `templates/namespace.yaml` | Borra ese template |
+| `release-namespace` distinto al `-n` actual (p. ej. `postgres`, `cloudnative-lab2`) | Install previo con `-n` distinto o `namespace:` en values ≠ `-n` | `helm uninstall` del release viejo; usa `{{ .Release.Namespace }}`; reinstala con un solo `-n` |
+| `release-name` debe equal `cnd3` / current value `cnd2` | Mismo chart/nombres de recurso, otro release, otro `-n` | Un release por entorno; nombres de recurso únicos o desinstalar el release anterior |
+| `spec.ports[0].port: Invalid value: 0` | Falta `api.servicePort` / `web.servicePort` en values | Añade puertos (8081 / 8080) como en la solución |
+| `helm list` vacío pero falla install | Recursos huérfanos de kubectl (M03) o Helm previo | Limpia recursos conflictivos o `helm uninstall` + delete secret/cm |
 
 ---
 
@@ -112,8 +128,12 @@ O con el script del curso:
 
 → Chart versionado, valores por entorno, releases con historial (`helm history`).
 
-**¿Por qué el namespace no va en el chart?**
+**¿Dónde se define el namespace?**
 
-→ En este curso el ns es infraestructura compartida (M03); Helm despliega la **app** dentro, no recrea el ns.
+→ En `helm install -n <ns>`. Los templates usan `{{ .Release.Namespace }}`. No dupliques `namespace:` en `values.yaml`.
+
+**¿Para qué `--create-namespace`?**
+
+→ Crea el namespace del `-n` si no existe. No sustituye a `.Release.Namespace` en templates.
 
 → **[M04-02 — Parametrización](M04-02-parametrizacion-helm.md)**

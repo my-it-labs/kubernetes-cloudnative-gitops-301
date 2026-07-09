@@ -1,4 +1,5 @@
-namespace: cloudnative-lab
+# Valores del chart cloudnative-demo (M04).
+# El namespace lo fija helm install -n <ns> → templates usan .Release.Namespace
 
 api:
   image: cloudnative-demo-api:local
