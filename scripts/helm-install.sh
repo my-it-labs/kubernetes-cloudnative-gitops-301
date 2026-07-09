@@ -7,5 +7,4 @@ NAMESPACE="${2:-cloudnative-lab}"
 
 helm upgrade --install "$RELEASE" "$CHART" \
   --namespace "$NAMESPACE" \
-  --create-namespace \
   "${@:3}"

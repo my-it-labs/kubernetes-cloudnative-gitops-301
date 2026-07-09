@@ -1,1 +1,2 @@
-# TODO M04-01: templates api, web, redis, postgres (copia estructura de infra/helm/solutions/)
+# TODO M04-01: templates api, web, redis, postgres (ver infra/helm/solutions/)
+# NO crear templates/namespace.yaml — cloudnative-lab ya existe desde M03
