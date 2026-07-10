@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - ./aplication-staging.yaml
 
 nameSuffix: -dev
 
