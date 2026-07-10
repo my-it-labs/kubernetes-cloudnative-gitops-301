@@ -7,4 +7,4 @@ resources:
   - ./web-deployment.yaml
   - ./web-service.yaml
   - ./redis.yaml
-  - ./postgres-statefulset.yaml
+  # - ./postgres-statefulset.yaml
