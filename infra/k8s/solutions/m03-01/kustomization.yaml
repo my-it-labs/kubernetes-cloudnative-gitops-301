@@ -1,0 +1,10 @@
+resources:
+  - ./namespace.yaml
+  - ./api-configmap.yaml
+  - ./api-secret.yaml
+  - ./api-deployment.yaml
+  - ./api-service.yaml
+  - ./web-deployment.yaml
+  - ./web-service.yaml
+  - ./redis.yaml
+  - ./postgres-statefulset.yaml
