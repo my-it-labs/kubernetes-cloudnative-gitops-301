@@ -4,6 +4,7 @@ Material de apoyo al curso (no sustituye los laboratorios).
 
 | Documento | Contenido |
 |-----------|-----------|
+| [Presentación Kubernetes DIVAL (PDF)](presentaciones/Kubernetes-DIVAL-Final-David.pdf) | Slides de apoyo al curso |
 | [12-Factor App](12-factor-app.md) | Metodología cloudnative: config, disposability, build/release/run y relación con contenedores |
 | [Progresión de labs](progresion-labs.md) | Cómo evoluciona el código: starters, solutions, lab-prepare |
 
