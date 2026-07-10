@@ -23,18 +23,33 @@ kubectl -n argocd wait --for=condition=available deployment/argocd-server --time
 
 ---
 
-### 2 — Acceso UI
+### 2 — Modo insecure (Codespace)
+
+El proxy de **Codespaces** termina TLS y habla HTTP con el port-forward. Argo CD, por defecto, redirige HTTP → HTTPS y entras en un bucle. Activa modo insecure **solo para el lab**:
 
 ```bash
-kubectl -n argocd port-forward svc/argocd-server 8082:443 &
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
+kubectl patch configmap argocd-cmd-params-cm -n argocd --type merge \
+  -p '{"data":{"server.insecure":"true"}}'
+kubectl -n argocd rollout restart deployment argocd-server
+kubectl -n argocd rollout status deployment argocd-server --timeout=120s
 ```
-
-Usuario: `admin`.
 
 ---
 
-### 3 — Application manifest
+### 3 — Acceso UI
+
+```bash
+kubectl -n argocd port-forward svc/argocd-server 8082:80 &
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
+```
+
+Abre el puerto **8082** en la pestaña **Ports** del Codespace. Usuario: `admin`.
+
+Si usas la CLI: `argocd login localhost:8082 --plaintext --insecure`.
+
+---
+
+### 4 — Application manifest
 
 Copia `infra/argocd/solutions/application-dev.yaml` a `infra/argocd/application-dev.yaml` y ajusta `repoURL` a **tu fork**.
 
@@ -45,7 +60,7 @@ argocd app sync cloudnative-demo-dev   # CLI opcional
 
 ---
 
-### 4 — Verificar reconciliación
+### 5 — Verificar reconciliación
 
 Cambia réplicas en Git → push → observa sync en UI ArgoCD.
 
