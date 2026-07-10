@@ -25,5 +25,5 @@ infra/kustomize/base/
 infra/kustomize/overlays/
 infra/argocd/application-*.yaml
 infra/observability/active/
-.github/workflows/ci.yml
-.github/workflows/cd.yml
+# .github/workflows/ci.yml
+# .github/workflows/cd.yml
