@@ -4,15 +4,16 @@ kind: Kustomization
 namespace: cloudnative-lab
 
 resources:
-  - ../../k8s/solutions/m03-01/namespace.yaml
-  - ../../k8s/solutions/m03-01/api-configmap.yaml
-  - ../../k8s/solutions/m03-01/api-secret.yaml
-  - ../../k8s/solutions/m03-01/api-deployment.yaml
-  - ../../k8s/solutions/m03-01/api-service.yaml
-  - ../../k8s/solutions/m03-01/web-deployment.yaml
-  - ../../k8s/solutions/m03-01/web-service.yaml
-  - ../../k8s/solutions/m03-01/redis.yaml
-  - ../../k8s/solutions/m03-03/postgres-statefulset.yaml
+  - ./namepace.yaml
+  # - ../../k8s/solutions/m03-01/namespace.yaml
+  # - ../../k8s/solutions/m03-01/api-configmap.yaml
+  # - ../../k8s/solutions/m03-01/api-secret.yaml
+  # - ../../k8s/solutions/m03-01/api-deployment.yaml
+  # - ../../k8s/solutions/m03-01/api-service.yaml
+  # - ../../k8s/solutions/m03-01/web-deployment.yaml
+  # - ../../k8s/solutions/m03-01/web-service.yaml
+  # - ../../k8s/solutions/m03-01/redis.yaml
+  # - ../../k8s/solutions/m03-03/postgres-statefulset.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: cloudnative-demo
