@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: cloudnative-lab
 
 resources:
-  - ./namepace.yaml
+  - ./namespace.yaml
   # - ../../k8s/solutions/m03-01/namespace.yaml
   # - ../../k8s/solutions/m03-01/api-configmap.yaml
   # - ../../k8s/solutions/m03-01/api-secret.yaml
